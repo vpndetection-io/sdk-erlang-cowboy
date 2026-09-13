@@ -20,6 +20,11 @@ jobs:
           otp-version: ${{ matrix.otp }}
           rebar3-version: '3'
       - run: rebar3 compile
+      # Hex refuses to build a tarball without a lockfile, and `as publish`
+      # cannot generate one - so a dependency bumped without relocking passes
+      # every test and then fails the RELEASE, after the tag is pushed.
+      - name: rebar.lock must be committed and current
+        run: git diff --exit-code -- rebar.lock
       - run: rebar3 eunit
       - run: rebar3 xref
 
