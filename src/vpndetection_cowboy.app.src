@@ -2,7 +2,7 @@
  [{description, "Official Cowboy middleware for the VPNDetection API: classify the visitor "
                 "behind each request as VPN, proxy, Tor, hosting, CDN or relay, and "
                 "optionally refuse them"},
-  {vsn, "1.0.0"},
+  {vsn, "2.0.0"},
   {registered, []},
   {applications, [kernel, stdlib, cowboy, vpndetection]},
   {env, []},
