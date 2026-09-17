@@ -13,7 +13,7 @@ Elixir's `Plug.Cowboy` runs the same middleware chain, so this works there too t
 ## Getting Started
 
 ```erlang
-{deps, [{vpndetection_cowboy, "~> 1.0"}]}.
+{deps, [{vpndetection_cowboy, "~> 2.0"}]}.
 ```
 
 Requires OTP 27 or newer, and Cowboy 2.13 or newer.
