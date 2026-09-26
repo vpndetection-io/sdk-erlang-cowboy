@@ -1,4 +1,4 @@
-# [<img src="https://s3.vpndetection.io/vpndetection-public/brand/mark.svg" alt="VPNDetection" width="24"/>](https://vpndetection.io/) VPNDetection Cowboy Middleware
+# [<img src="https://s3.vpndetection.io/vpndetection-public/brand/mark.svg" alt="VPNDetection" height="28"/>](https://vpndetection.io/) VPNDetection Cowboy Middleware
 
 [![Hex.pm](https://img.shields.io/hexpm/v/vpndetection_cowboy.svg)](https://hex.pm/packages/vpndetection_cowboy)
 [![HexDocs](https://img.shields.io/badge/hex-docs-blue.svg)](https://hexdocs.pm/vpndetection_cowboy)
