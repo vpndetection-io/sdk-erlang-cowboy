@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.0.7 - 2026-10-01
+
+### Fixes
+
+- Require vpndetection 3.4.2: concurrent requests from one visitor share one lookup ([`e5c67e3`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/e5c67e3cb5298a092ab7898fab7af87c649b30a8))
+
 ## 2.0.6 - 2026-09-29
 
 ### Fixes
