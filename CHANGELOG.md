@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.0.9 - 2026-10-05
+
+### Fixes
+
+- Require vpndetection 3.5.0: a 503 reaches its retries at once on OTP 28.4+ ([`e690eb7`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/e690eb7796a35fbf982686e67994f51d8a4c0d8b))
+
 ## 2.0.8 - 2026-10-04
 
 ### Fixes
