@@ -202,6 +202,34 @@ a_condition_that_constrains_nothing_is_refused_when_the_core_is_built_test() ->
     ?assertMatch({error, {constrains_nothing, _, _}},
                  vpndetection_cowboy:core(#{block_condition => #{is_vpn => false}})).
 
+%% Built as the README builds it. `os:getenv/1' answers `false' for an unset
+%% variable, which made the core raise function_clause until vpndetection 3.5.2;
+%% now it runs with no key and says so once.
+the_readme_setup_builds_with_the_variable_set_or_unset_test() ->
+    Previous = os:getenv("VPNDETECTION_API_KEY"),
+    try
+        os:putenv("VPNDETECTION_API_KEY", "sekrit"),
+        {ok, #{core := Keyed}} = vpndetection_cowboy:core(#{api_key => os:getenv("VPNDETECTION_API_KEY")}),
+        ?assertEqual(<<"sekrit">>, maps:get(api_key, maps:get(client, Keyed))),
+        vpndetection_middleware:close(Keyed),
+
+        os:unsetenv("VPNDETECTION_API_KEY"),
+        Self = self(),
+        {ok, #{core := Keyless}} = vpndetection_cowboy:core(#{api_key => os:getenv("VPNDETECTION_API_KEY"),
+                                                              on_warn => fun(M) -> Self ! {warned, M} end}),
+        ?assertEqual(undefined, maps:get(api_key, maps:get(client, Keyless))),
+        ?assertMatch([_], warnings()),
+        vpndetection_middleware:close(Keyless)
+    after
+        case Previous of
+            false -> os:unsetenv("VPNDETECTION_API_KEY");
+            Value -> os:putenv("VPNDETECTION_API_KEY", Value)
+        end
+    end.
+
+warnings() ->
+    receive {warned, Message} -> [Message | warnings()] after 0 -> [] end.
+
 %% Named in the chain but never configured: every request would otherwise crash
 %% on a missing env key, which is the opposite of the fail-open this middleware
 %% promises everywhere else.
