@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.0.11 - 2026-10-14
+
+### Fixes
+
+- Require vpndetection 3.5.2: an unset key runs keyless, an unreadable 2xx is retried ([`e847230`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/e847230da413bfc4caa5b5862a039ac2b972abc0))
+
 ## 2.0.10 - 2026-10-10
 
 ### Fixes
