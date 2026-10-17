@@ -16,6 +16,12 @@ Elixir's `Plug.Cowboy` runs the same middleware chain, so this works there too t
 {deps, [{vpndetection_cowboy, "~> 2.0"}]}.
 ```
 
+In a release, also name both in your `.app.src`, or the release boots without them and the first request fails with `undef`:
+
+```erlang
+{applications, [kernel, stdlib, cowboy, vpndetection_cowboy]}
+```
+
 Requires OTP 27 or newer, and Cowboy 2.13 or newer.
 
 You need an API key. Create one in the [console](https://app.vpndetection.io); the free tier's allowance is counted per source address, and a server is a single source address, so a key is what makes this usable in production rather than optional.
@@ -31,7 +37,7 @@ Dispatch = cowboy_router:compile([{'_', [{"/", my_handler, []}]}]),
 }).
 ```
 
-**After `cowboy_router`**, so a `skip` can look at the matched route, and **before `cowboy_handler`**, so a blocked request never reaches one.
+**After `cowboy_router`**, so a request no route matches gets its 404 from the router without costing a lookup, and a `skip` can read the `bindings` and `path_info` the router set; **before `cowboy_handler`**, so a blocked request never reaches one.
 
 The core owns the HTTP client and the answer cache, so build it once. One per request would mean neither ever helps.
 
