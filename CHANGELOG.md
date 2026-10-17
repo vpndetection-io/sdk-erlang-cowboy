@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.0.13 - 2026-10-17
+
+### Fixes
+
+- Require vpndetection 3.6.0: a nil key is no key, and the cache ends with its owner ([`67be02a`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/67be02a309df94ce2af70272333b0b535f60344a))
+
 ## 2.0.12 - 2026-10-16
 
 ### Fixes
