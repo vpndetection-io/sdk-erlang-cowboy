@@ -2,6 +2,16 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.1.0 - 2026-10-18
+
+### Features
+
+- Read the PROXY protocol's source address from a trusted balancer ([`644f838`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/644f838ba50299f8f18180c8288957e083998ae8))
+
+### Fixes
+
+- Require vpndetection 3.7.0: the PROXY selector and is_pubproxy ([`319e2aa`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/319e2aad45ae2505cc7ea9baa531d2a9d0c6a9b4))
+
 ## 2.0.13 - 2026-10-17
 
 ### Fixes
