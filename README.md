@@ -119,7 +119,11 @@ Behind a balancer that speaks the PROXY protocol (nginx's stream module with `pr
     env => #{dispatch => Dispatch, vpndetection => Core},
     middlewares => [cowboy_router, vpndetection_cowboy, cowboy_handler]
 }),
-%% with the core built from
+```
+
+and build the core with the selector:
+
+```erlang
 ip_selector => vpndetection_selectors:proxy_protocol([<<"10.0.0.0/8">>])
 ```
 
