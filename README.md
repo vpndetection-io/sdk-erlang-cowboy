@@ -13,7 +13,7 @@ Elixir's `Plug.Cowboy` runs the same middleware chain, so this works there too t
 ## Getting Started
 
 ```erlang
-{deps, [{vpndetection_cowboy, "~> 2.0"}]}.
+{deps, [{vpndetection_cowboy, "~> 2.1"}]}.
 ```
 
 In a release, also name both in your `.app.src`, or the release boots without them and the first request fails with `undef`:
