@@ -111,6 +111,20 @@ ip_selector => vpndetection_selectors:header(<<"CF-Connecting-IP">>)   % or True
 
 `vpndetection_selectors:xff(0)` reads the left-most `X-Forwarded-For` entry. Be aware that the left-most entry is whatever the caller sent, because proxies append to that header — it is only trustworthy when an edge you control overwrites it. If you know how many proxies sit in front, count from the right instead: `xff(1)` is the address your nearest proxy saw.
 
+Behind a balancer that speaks the PROXY protocol (nginx's stream module with `proxy_protocol on`, HAProxy's `send-proxy`), start the listener with `proxy_header => true` and read the source address the header carries. Cowboy reads any connection's header that way, so the selector believes it only from the balancers you list, as addresses or CIDR blocks, and answers the socket peer for anyone else:
+
+```erlang
+{ok, _} = cowboy:start_clear(http, [{port, 8080}], #{
+    proxy_header => true,
+    env => #{dispatch => Dispatch, vpndetection => Core},
+    middlewares => [cowboy_router, vpndetection_cowboy, cowboy_handler]
+}),
+%% with the core built from
+ip_selector => vpndetection_selectors:proxy_protocol([<<"10.0.0.0/8">>])
+```
+
+A balancer's own health check sends a header with no source, and is checked as the balancer. Cowboy's own guide says to enable `proxy_header` only on a listener that nothing but your balancers can reach.
+
 Anything else, pass your own fun. It receives a view of the request and returns an address:
 
 ```erlang

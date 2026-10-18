@@ -114,13 +114,24 @@ classify(#{core := Core, on_blocked := OnBlocked, skip := Skip}, Req, Env) ->
 
 %% Cowboy has NO trusted-proxy setting, so `peer' is the socket peer and nothing
 %% else. Behind a proxy that is the proxy's own address, which is why the README
-%% spends most of its length on the selector.
+%% spends most of its length on the selector. A listener started with
+%% `proxy_header => true' puts the decoded PROXY header on the request itself,
+%% under `proxy_header' (there is no accessor), and its source address is what
+%% `vpndetection_selectors:proxy_protocol/1' reads, from a trusted peer only.
 view(Req) ->
     #{
         header => fun(Name) -> cowboy_req:header(Name, Req, undefined) end,
         framework_ip => fun() ->
             {Address, _Port} = cowboy_req:peer(Req),
             list_to_binary(inet:ntoa(Address))
+        end,
+        proxy_address => fun() ->
+            case maps:get(proxy_header, Req, undefined) of
+                #{src_address := Address} when is_tuple(Address) ->
+                    list_to_binary(inet:ntoa(Address));
+                _ ->
+                    undefined
+            end
         end
     }.
 

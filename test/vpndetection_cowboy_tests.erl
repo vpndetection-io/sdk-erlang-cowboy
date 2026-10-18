@@ -169,6 +169,41 @@ a_header_selector_reads_the_edge_that_writes_it_test_() ->
         stop(Api)
     end}.
 
+%% Behind a balancer speaking the PROXY protocol, every visitor arrives from the
+%% balancer, and the header it writes first on the connection names the visitor.
+%% Only a trusted peer's header is read: from anywhere else it is a forgery.
+the_proxy_protocol_source_is_read_from_a_trusted_balancer_test_() ->
+    {setup, fun start_apps/0, fun stop_apps/1, fun() ->
+        Api = api(#{<<"is_vpn">> => true}),
+        Options = #{base_url => base_url(Api)},
+        Trusting = proxied_app(Options#{ip_selector => vpndetection_selectors:proxy_protocol([<<"127.0.0.0/8">>])}),
+        [begin
+             {200, Body} = proxied_get(Trusting, proxy_header(Version, {45, 83, 91, 1})),
+             ?assertEqual({Version, ?PUBLIC_IP}, {Version, maps:get(<<"ip">>, Body)}),
+             ?assertEqual(true, maps:get(<<"is_vpn">>, Body))
+         end || Version <- [1, 2]],
+        ?assertEqual([?PUBLIC_IP], asked(Api)),
+        %% A balancer's health check carries no source, so the peer answers.
+        {200, Local} = proxied_get(Trusting, ranch_proxy_header:header(#{version => 2, command => local})),
+        ?assertEqual(<<"127.0.0.1">>, maps:get(<<"ip">>, Local)),
+        stop(Trusting),
+
+        Elsewhere = proxied_app(Options#{ip_selector => vpndetection_selectors:proxy_protocol([<<"10.9.9.9">>])}),
+        {200, Forged} = proxied_get(Elsewhere, proxy_header(1, {45, 83, 91, 2})),
+        ?assertEqual(<<"127.0.0.1">>, maps:get(<<"ip">>, Forged)),
+        ?assertEqual(true, maps:get(<<"is_bogon">>, Forged)),
+        ?assertEqual([?PUBLIC_IP], asked(Api)),
+        stop(Elsewhere),
+
+        %% Without the selector the header changes nothing: the default is the peer.
+        Default = proxied_app(Options),
+        {200, Peer} = proxied_get(Default, proxy_header(2, {45, 83, 91, 3})),
+        ?assertEqual(<<"127.0.0.1">>, maps:get(<<"ip">>, Peer)),
+        ?assertEqual([?PUBLIC_IP], asked(Api)),
+        stop(Default),
+        stop(Api)
+    end}.
+
 depth_counts_trusted_hops_from_the_right_test_() ->
     {setup, fun start_apps/0, fun stop_apps/1, fun() ->
         Api = api(#{<<"is_vpn">> => true}),
@@ -290,6 +325,38 @@ listen(Env) ->
         middlewares => [cowboy_router, vpndetection_cowboy, cowboy_handler]
     }),
     {Name, ranch:get_port(Name)}.
+
+proxied_app(Options) ->
+    {ok, Core} = vpndetection_cowboy:core(Options),
+    Name = {app, make_ref()},
+    {ok, _} = cowboy:start_clear(Name, [{port, 0}], #{
+        proxy_header => true,
+        env => #{dispatch => dispatch(), vpndetection => Core},
+        middlewares => [cowboy_router, vpndetection_cowboy, cowboy_handler]
+    }),
+    {Name, ranch:get_port(Name)}.
+
+proxy_header(Version, Source) ->
+    ranch_proxy_header:header(#{
+        version => Version, command => proxy,
+        transport_family => ipv4, transport_protocol => stream,
+        src_address => Source, src_port => 40000,
+        dest_address => {127, 0, 0, 1}, dest_port => 80
+    }).
+
+%% httpc cannot write a PROXY header, so the request goes out by hand.
+proxied_get({_Name, Port}, Header) ->
+    {ok, Socket} = gen_tcp:connect("127.0.0.1", Port, [binary, {active, false}]),
+    ok = gen_tcp:send(Socket, [Header, <<"GET / HTTP/1.1\r\nhost: localhost\r\nconnection: close\r\n\r\n">>]),
+    Reply = read_all(Socket, <<>>),
+    [<<"HTTP/1.1 ", Code:3/binary, _/binary>> = _Head, Body] = binary:split(Reply, <<"\r\n\r\n">>),
+    {binary_to_integer(Code), json:decode(Body)}.
+
+read_all(Socket, Acc) ->
+    case gen_tcp:recv(Socket, 0, 5000) of
+        {ok, Data} -> read_all(Socket, <<Acc/binary, Data/binary>>);
+        {error, closed} -> Acc
+    end.
 
 %%% ------------------------------------------------------------- the stub API
 
