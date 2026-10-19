@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.1.2 - 2026-10-19
+
+### Fixes
+
+- Require vpndetection 3.8.1: warn once when the result cache has stopped ([`1d4bb94`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/1d4bb94d771dfc781de0e534d0162a4ffebc6936))
+
 ## 2.1.1 - 2026-10-19
 
 ### Fixes
