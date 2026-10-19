@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.1.1 - 2026-10-19
+
+### Fixes
+
+- Require vpndetection 3.8.0: num_ports and num_proxies in the pubproxy detail ([`8aeb645`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/8aeb6450aa8c5e05c9667832bfc9c6902472f030))
+
 ## 2.1.0 - 2026-10-18
 
 ### Features
