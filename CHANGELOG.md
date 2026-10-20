@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.1.3 - 2026-10-20
+
+### Features
+
+- Require vpndetection 3.9.0: lookup results carry location and asn ([`bd6ffa1`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/bd6ffa126e9370b4fc397eb8eef6004624903f3d))
+
 ## 2.1.2 - 2026-10-19
 
 ### Fixes
