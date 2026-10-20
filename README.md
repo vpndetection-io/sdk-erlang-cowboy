@@ -24,7 +24,7 @@ In a release, also name both in your `.app.src`, or the release boots without th
 
 Requires OTP 27 or newer, and Cowboy 2.13 or newer.
 
-You need an API key. Create one in the [console](https://app.vpndetection.io); the free tier's allowance is counted per source address, and a server is a single source address, so a key is what makes this usable in production rather than optional.
+You need an API key. Create one in the [console](https://app.vpndetection.io); without one the allowance is counted per source address, and a server is a single source address, so a key is what makes this usable in production rather than optional.
 
 Build the core once, at startup, and name this module in the chain:
 
@@ -168,7 +168,7 @@ Beyond a few million distinct visitors a day, stop calling the API per request: 
 
 ## Absent is not false
 
-Only `ip` and `is_vpn` come back on every plan. A key your plan does not include is ABSENT from the result map, which means "not in your plan" rather than "checked, and no".
+Without a key only `ip` and `is_vpn` come back, and a free key adds Tor, relay, `location` and `asn`. A key your plan does not include is ABSENT from the result map, which means "not in your plan" rather than "checked, and no".
 
 ```erlang
 maps:get(is_hosting, Result, false)        % when you only want the flag
