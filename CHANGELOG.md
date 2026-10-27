@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.1.6 - 2026-10-27
+
+### Fixes
+
+- Require vpndetection 3.10.2: a lowercase date-time is read ([`65f2983`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/65f298395eba6f4c88ef1adf3b8b401c7cd0d9cd))
+
 ## 2.1.5 - 2026-10-26
 
 ### Fixes
