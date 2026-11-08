@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.1.8 - 2026-11-08
+
+### Fixes
+
+- Require vpndetection 3.11.1: new/1 refuses a client concurrency no batch can use ([`2f1e829`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/2f1e8296c242640eff0b38a0a19b90d596e3c016))
+
 ## 2.1.7 - 2026-11-07
 
 ### Features
