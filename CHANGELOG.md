@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.1.12 - 2026-11-11
+
+### Features
+
+- Require vpndetection 3.13.0: trial_expired on a trial key's answers ([`8f63020`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/8f63020dffcd278742e2cbd6ed4f5084a0307404))
+
 ## 2.1.11 - 2026-11-11
 
 ### Fixes
