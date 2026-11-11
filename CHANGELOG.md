@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.1.10 - 2026-11-11
+
+### Fixes
+
+- Require vpndetection 3.12.1: plainer words on lookups without a key ([`0f48b60`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/0f48b602a586f056356f2805246a4509a67e8db5))
+
 ## 2.1.9 - 2026-11-11
 
 ### Features
