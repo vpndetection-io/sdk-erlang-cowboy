@@ -24,7 +24,7 @@ In a release, also name both in your `.app.src`, or the release boots without th
 
 Requires OTP 27 or newer, and Cowboy 2.13 or newer.
 
-You need an API key. Create one in the [console](https://app.vpndetection.io); without one, lookups are limited to 60 a minute from each source address, and a server is a single source address, so a key is what makes this usable in production rather than optional.
+You need an API key. Create one in the [console](https://app.vpndetection.io); without one a lookup leaves out the hosting, CDN and proxy flags, so a key is what makes this usable in production rather than optional.
 
 Build the core once, at startup, and name this module in the chain:
 
