@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.1.11 - 2026-11-11
+
+### Fixes
+
+- Require vpndetection 3.12.2: the Unlimited tier and its terms ([`5b56fa9`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/5b56fa92bb2c707f96be0ace308eef4c5382450f))
+
 ## 2.1.10 - 2026-11-11
 
 ### Fixes
