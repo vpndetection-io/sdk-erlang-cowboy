@@ -265,6 +265,46 @@ the_readme_setup_builds_with_the_variable_set_or_unset_test() ->
 warnings() ->
     receive {warned, Message} -> [Message | warnings()] after 0 -> [] end.
 
+%% The README's setup again, from a PUBLIC peer with a forged X-Forwarded-For, the
+%% lookup answered by the stub: a core that dropped the key, or read the header by
+%% default, would pass the test above. Cowboy's peer is the socket's, which a
+%% client on this machine cannot make public, so the request goes to the
+%% middleware callback with the peer set where Cowboy sets it.
+the_readme_key_reaches_the_api_for_a_public_peer_test_() ->
+    {setup, fun start_apps/0, fun stop_apps/1, fun() ->
+        Previous = os:getenv("VPNDETECTION_API_KEY"),
+        try
+            [begin
+                 Api = api(#{<<"is_vpn">> => false}),
+                 case Key of
+                     false -> os:unsetenv("VPNDETECTION_API_KEY");
+                     _ -> os:putenv("VPNDETECTION_API_KEY", Key)
+                 end,
+                 {ok, Configured} = vpndetection_cowboy:core(#{
+                     api_key => os:getenv("VPNDETECTION_API_KEY"),
+                     base_url => base_url(Api),
+                     on_warn => fun(_) -> ok end
+                 }),
+                 Req = #{peer => {{45, 83, 91, 1}, 40000},
+                         headers => #{<<"x-forwarded-for">> => <<"1.1.1.1">>}},
+                 {ok, Enriched, _Env} =
+                     vpndetection_cowboy:execute(Req, #{vpndetection => Configured}),
+                 Found = vpndetection_cowboy:lookup(Enriched),
+                 ?assertEqual(?PUBLIC_IP, maps:get(ip, Found)),
+                 ?assertEqual(false, maps:get(is_vpn, maps:get(result, Found))),
+                 ?assertEqual([?PUBLIC_IP], asked(Api)),
+                 ?assertEqual({Key, [Sent]}, {Key, authorizations(Api)}),
+                 vpndetection_middleware:close(maps:get(core, Configured)),
+                 stop(Api)
+             end || {Key, Sent} <- [{"sekrit", <<"Bearer sekrit">>}, {false, undefined}]]
+        after
+            case Previous of
+                false -> os:unsetenv("VPNDETECTION_API_KEY");
+                Value -> os:putenv("VPNDETECTION_API_KEY", Value)
+            end
+        end
+    end}.
+
 %% Named in the chain but never configured: every request would otherwise crash
 %% on a missing env key, which is the opposite of the fail-open this middleware
 %% promises everywhere else.
@@ -282,6 +322,7 @@ an_unconfigured_middleware_lets_the_request_through_test_() ->
 init(Req, {api, Body, Status, Asked} = State) ->
     Address = iolist_to_binary(lists:join($/, cowboy_req:path_info(Req))),
     Asked ! {asked, Address},
+    Asked ! {authorization, cowboy_req:header(<<"authorization">>, Req, undefined)},
     Answer = json:encode(Body#{<<"ip">> => Address}),
     {ok,
         cowboy_req:reply(Status, #{<<"content-type">> => <<"application/json">>}, Answer, Req),
@@ -380,6 +421,9 @@ base_url({_Name, Port, _Asked}) ->
 
 asked({_Name, _Port, Collector}) ->
     [A || {asked, A} <- seen(Collector)].
+
+authorizations({_Name, _Port, Collector}) ->
+    [A || {authorization, A} <- seen(Collector)].
 
 stop({Name, _Port}) -> ok = cowboy:stop_listener(Name);
 stop({Name, _Port, _Asked}) -> ok = cowboy:stop_listener(Name).
