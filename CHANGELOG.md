@@ -2,6 +2,13 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.1.14 - 2026-11-15
+
+### Fixes
+
+- Require vpndetection 3.14.0: is_bogon on every answer, and provider_name beside each provider ([`4c41b59`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/4c41b59a8badceb8e6668335585f5c01580403b4))
+- Release: fail when hex.pm only stages the publish for approval ([`b2a5352`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/b2a53521806981ef1035f6c9b7cc3506ad82b255))
+
 ## 2.1.13 - 2026-11-11
 
 ### Fixes
