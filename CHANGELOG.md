@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.1.17 - 2026-11-19
+
+### Fixes
+
+- Require vpndetection 3.16.1: re-pinned to spec 2026.11.18 ([`e39ee83`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/e39ee833bd04b456a2e368bf581e58bda937c2a7))
+
 ## 2.1.16 - 2026-11-18
 
 ### Fixes
