@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.1.18 - 2026-11-20
+
+### Features
+
+- Require vpndetection 3.17.0: the network, service, company and abuse members ([`1416613`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/1416613c936ea65aed4d91ef7f8c0a5c0bf6f271))
+
 ## 2.1.17 - 2026-11-19
 
 ### Fixes
