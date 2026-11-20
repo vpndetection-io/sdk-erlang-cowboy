@@ -24,7 +24,7 @@ In a release, also name both in your `.app.src`, or the release boots without th
 
 Requires OTP 27 or newer, and Cowboy 2.13 or newer.
 
-You need an API key on a paid plan. Create one in the [console](https://app.vpndetection.io); without one a lookup is on Unlimited, the free plan, and leaves out the hosting, CDN and proxy flags, so a paid plan is what makes this usable in production rather than optional. A free account tries every field, 100 lookups a day.
+You need an API key on a paid plan. Create one in the [console](https://app.vpndetection.io); without one a lookup is on Unlimited, the free plan, and leaves out the hosting, CDN and proxy flags, so a paid plan is what makes this usable in production rather than optional. A free account tries every field.
 
 Build the core once, at startup, and name this module in the chain:
 
