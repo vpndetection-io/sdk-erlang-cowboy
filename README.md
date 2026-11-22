@@ -24,7 +24,7 @@ In a release, also name both in your `.app.src`, or the release boots without th
 
 Requires OTP 27 or newer, and Cowboy 2.13 or newer.
 
-No API key needed to start. Without one, a lookup is on Unlimited, the free plan, which answers VPN, Tor and relay detection with no daily or monthly cap. A paid plan's key adds the hosting, CDN and proxy flags and the provider behind each flag: create one in the [console](https://app.vpndetection.io). A free account tries every field.
+No API key needed to start. Without one, a lookup is on Unlimited, the free plan, which answers VPN, Tor, relay and bot detection (`is_bot`, whether an automated client such as a search engine's crawler uses the address) with no daily or monthly cap. A paid plan's key adds the hosting, CDN and proxy flags, the provider behind each flag, and `bot`, whose bot it is and whether its operator vouches for the address: create one in the [console](https://app.vpndetection.io). A free account tries every field.
 
 Build the core once, at startup, and name this module in the chain:
 
@@ -168,7 +168,7 @@ Beyond a few million distinct visitors a day, stop calling the API per request: 
 
 ## Absent is not false
 
-Unlimited, with a key or without one, leaves out `is_hosting`, `is_cdn` and the four proxy flags, and of the detail behind each flag it answers only Tor's and relay's. A key your plan does not include is ABSENT from the result map, which means "not in your plan" rather than "checked, and no".
+Unlimited, with a key or without one, leaves out `is_hosting`, `is_cdn`, the four proxy flags and `bot`, and of the detail behind each flag it answers only Tor's and relay's. A key your plan does not include is ABSENT from the result map, which means "not in your plan" rather than "checked, and no".
 
 ```erlang
 maps:get(is_hosting, Result, false)        % when you only want the flag
