@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.2.2 - 2026-11-24
+
+### Fixes
+
+- Require vpndetection 3.20.0: a condition on a list member matches any element ([`996e744`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/996e744f9146591a403260affafdefbe3f7c2bda))
+
 ## 2.2.1 - 2026-11-24
 
 ### Fixes
