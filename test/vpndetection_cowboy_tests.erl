@@ -42,10 +42,16 @@ assert_condition(#{<<"condition">> := Condition, <<"expect">> := Expect, <<"why"
         on_warn => sink(Warnings)
     }),
 
-    {Status, _} = get(App, "/", []),
+    {Status, Seen} = get(App, "/", []),
 
     Want = case maps:get(<<"blocked">>, Expect) of true -> 403; false -> 200 end,
     ?assertEqual({Want, Why}, {Status, Why}),
+    %% The status alone passes every case the condition lets through with the
+    %% middleware removed, so the handler must also see the answer it attached.
+    case Status of
+        403 -> ?assertEqual({#{<<"error">> => <<"access denied">>}, Why}, {Seen, Why});
+        200 -> ?assertEqual({attached(Case, Ip), Why}, {maps:with(maps:keys(attached(Case, Ip)), Seen), Why})
+    end,
     Missing = maps:get(<<"missing">>, Expect, []),
     Reported = [W || W <- seen(Warnings), binary:match(W, <<"does not include">>) =/= nomatch],
     ?assertEqual({min(length(Missing), 1), Why}, {length(Reported), Why}),
@@ -533,6 +539,14 @@ seen(Pid) ->
         {seen, Messages} -> Messages
     after 5000 -> erlang:error(timeout)
     end.
+
+%% What the handler echoes of the answer a corpus case let through.
+attached(#{<<"bogon">> := _}, Ip) ->
+    #{<<"attached">> => true, <<"ip">> => Ip, <<"is_bogon">> => true, <<"is_vpn">> => false,
+      <<"error">> => null};
+attached(#{<<"body">> := Body}, Ip) ->
+    #{<<"attached">> => true, <<"ip">> => Ip, <<"is_vpn">> => maps:get(<<"is_vpn">>, Body, null),
+      <<"error">> => null}.
 
 fixture(#{<<"bogon">> := Ip}) ->
     %% Answered locally, so the stub is never asked and the synthesized shape is
