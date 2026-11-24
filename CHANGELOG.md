@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.2.1 - 2026-11-24
+
+### Fixes
+
+- Require vpndetection 3.19.1: an option no request could use is refused when the middleware is built ([`4a9ad09`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/4a9ad09e0e3b57becc6ebc615957e0982ff6aa4f))
+
 ## 2.2.0 - 2026-11-24
 
 ### Features
