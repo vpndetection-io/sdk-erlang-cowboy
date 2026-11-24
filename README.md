@@ -97,6 +97,24 @@ on_blocked => fun(Req, _Found) ->
 end
 ```
 
+## Letting verified crawlers through
+
+Set `allow_bots => true` and the middleware sends each request's own `User-Agent` with its lookup, and a request whose answer says its agent is `verified` (the agent's operator, such as Google for Googlebot, vouches for the address) is never refused, whatever your `block_condition` matches. The answer is still attached, with its `user_agent` verdict:
+
+```erlang
+vpndetection_cowboy:core(#{api_key => Key, allow_bots => true,
+                           block_condition => #{is_hosting => true}}).
+```
+
+```erlang
+case vpndetection_cowboy:lookup(Req) of
+    #{result := #{user_agent := #{agent := Agent, verdict := <<"verified">>}}} -> {crawler, Agent};
+    _ -> visitor
+end
+```
+
+A request with no `User-Agent`, or an empty one, sends none. A condition can name the verdict, such as `#{user_agent => #{verdict => <<"spoofed">>}}` to refuse a crawler that is not what it claims; it can match only with `allow_bots` on. The verdict needs every field (a paid plan, or the trial): when an agent was sent and the answer carries no `user_agent`, nothing is let through and the middleware warns once, as `on_missing_field` says. Off by default, so the cache holds one answer per address rather than one per agent.
+
 ## Where the client address comes from
 
 Get this setting right, or none of the above works.

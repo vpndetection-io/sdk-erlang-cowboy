@@ -19,6 +19,8 @@
 -export([init/2]).
 
 -define(PUBLIC_IP, <<"45.83.91.1">>).
+-define(GOOGLEBOT, <<"Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)">>).
+-define(SPOOFED, <<"Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)">>).
 
 %%% ---------------------------------------------------------------- the corpus
 
@@ -305,6 +307,42 @@ the_readme_key_reaches_the_api_for_a_public_peer_test_() ->
         end
     end}.
 
+%% `allow_bots' as the README sets it up, from a PUBLIC peer: the request's own
+%% User-Agent reaches the API, a crawler its operator vouches for passes the
+%% condition it otherwise meets with its answer attached, a spoofed one and a
+%% request with no User-Agent are refused, and off sends no agent. The request
+%% is built here, so it carries no User-Agent a test client would add.
+allow_bots_lets_a_verified_crawler_through_for_a_public_peer_test_() ->
+    {setup, fun start_apps/0, fun stop_apps/1, fun() ->
+        Api = verdict_api(),
+        Run = fun(Options, Headers) ->
+            {ok, Configured} = vpndetection_cowboy:core(Options#{
+                api_key => <<"k">>,
+                base_url => base_url(Api),
+                block_condition => #{is_vpn => true},
+                on_blocked => fun(Req, _Found) -> Req#{refused => true} end,
+                on_warn => fun(_) -> ok end
+            }),
+            Req = #{peer => {{66, 249, 66, 1}, 40000}, headers => Headers},
+            Outcome = vpndetection_cowboy:execute(Req, #{vpndetection => Configured}),
+            vpndetection_middleware:close(maps:get(core, Configured)),
+            Outcome
+        end,
+
+        {ok, Passed, _Env} = Run(#{allow_bots => true}, #{<<"user-agent">> => ?GOOGLEBOT}),
+        ?assertMatch(#{blocked := false, ip := <<"66.249.66.1">>,
+                       result := #{is_vpn := true, user_agent := #{verdict := <<"verified">>}}},
+                     vpndetection_cowboy:lookup(Passed)),
+        {stop, Spoofed} = Run(#{allow_bots => true}, #{<<"user-agent">> => ?SPOOFED}),
+        ?assertMatch(#{refused := true}, Spoofed),
+        {stop, Absent} = Run(#{allow_bots => true}, #{}),
+        ?assertMatch(#{refused := true}, Absent),
+        {stop, Off} = Run(#{}, #{<<"user-agent">> => ?GOOGLEBOT}),
+        ?assertMatch(#{refused := true}, Off),
+        ?assertEqual([?GOOGLEBOT, ?SPOOFED, none, none], [A || {agent, A} <- seen(asked_by(Api))]),
+        stop(Api)
+    end}.
+
 %% Named in the chain but never configured: every request would otherwise crash
 %% on a missing env key, which is the opposite of the fail-open this middleware
 %% promises everywhere else.
@@ -319,6 +357,19 @@ an_unconfigured_middleware_lets_the_request_through_test_() ->
 %%% ------------------------------------------------------------------- the app
 
 %% A handler that reports back what the middleware attached.
+init(Req, {verdicts, Asked} = State) ->
+    Address = iolist_to_binary(lists:join($/, cowboy_req:path_info(Req))),
+    Agent = proplists:get_value(<<"user_agent">>, cowboy_req:parse_qs(Req), none),
+    Asked ! {agent, Agent},
+    Verdict = case Agent of
+        none -> #{};
+        ?GOOGLEBOT -> #{<<"user_agent">> => #{<<"agent">> => <<"Googlebot">>, <<"kind">> => <<"bot">>,
+                                              <<"verdict">> => <<"verified">>}};
+        _ -> #{<<"user_agent">> => #{<<"agent">> => <<"Bingbot">>, <<"kind">> => <<"bot">>,
+                                     <<"verdict">> => <<"spoofed">>}}
+    end,
+    Answer = json:encode(Verdict#{<<"ip">> => Address, <<"is_vpn">> => true}),
+    {ok, cowboy_req:reply(200, #{<<"content-type">> => <<"application/json">>}, Answer, Req), State};
 init(Req, {api, Body, Status, Asked} = State) ->
     Address = iolist_to_binary(lists:join($/, cowboy_req:path_info(Req))),
     Asked ! {asked, Address},
@@ -415,6 +466,18 @@ api(Body, Status) ->
     ]),
     {ok, _} = cowboy:start_clear(Name, [{port, 0}], #{env => #{dispatch => Dispatch}}),
     {Name, ranch:get_port(Name), Asked}.
+
+%% Answers every address as a VPN, with the verdict for the agent it was sent:
+%% `verified' for Googlebot's, `spoofed' for any other, none when none came.
+verdict_api() ->
+    Asked = collector(),
+    Name = {api, make_ref()},
+    Dispatch = cowboy_router:compile([{'_', [{"/[...]", ?MODULE, {verdicts, Asked}}]}]),
+    {ok, _} = cowboy:start_clear(Name, [{port, 0}], #{env => #{dispatch => Dispatch}}),
+    {Name, ranch:get_port(Name), Asked}.
+
+asked_by({_Name, _Port, Collector}) ->
+    Collector.
 
 base_url({_Name, Port, _Asked}) ->
     iolist_to_binary(["http://127.0.0.1:", integer_to_list(Port)]).
