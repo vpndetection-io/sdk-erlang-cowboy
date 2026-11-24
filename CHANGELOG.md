@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.2.0 - 2026-11-24
+
+### Features
+
+- Require vpndetection 3.19.0: allow_bots lets a verified crawler through ([`191c82d`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/191c82d3d6f051724a9fbf20cbe40a262302efee))
+
 ## 2.1.19 - 2026-11-22
 
 ### Features
