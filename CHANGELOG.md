@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.2.3 - 2026-11-25
+
+### Fixes
+
+- Require vpndetection 3.20.1: its README and type docs name the Data plan ([`b6991a0`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/b6991a0d6e9c2ced222ffb32dee31f618a9fc1de))
+
 ## 2.2.2 - 2026-11-24
 
 ### Fixes
