@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.2.4 - 2026-11-26
+
+### Features
+
+- Require vpndetection 3.21.0: allow_bots sends only a crawler's User-Agent, at most four an address ([`4cd3700`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/4cd3700a68f59b86d4b208cd39355dd64a471e44))
+
 ## 2.2.3 - 2026-11-25
 
 ### Fixes
