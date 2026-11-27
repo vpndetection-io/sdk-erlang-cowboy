@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.2.6 - 2026-11-27
+
+### Features
+
+- Require vpndetection 3.22.0: a keyless answer without the AS's type reads ([`055fd28`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/055fd28401a1bb52b9d6ed5c84c25f3975237084))
+
 ## 2.2.5 - 2026-11-26
 
 ### Fixes
