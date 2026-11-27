@@ -24,7 +24,7 @@ In a release, also name both in your `.app.src`, or the release boots without th
 
 Requires OTP 27 or newer, and Cowboy 2.13 or newer.
 
-No API key needed to start. Without one, a lookup is on Unlimited, the free plan, which answers VPN, Tor, relay and bot detection (`is_bot`, whether an automated client such as a search engine's crawler uses the address) with no daily or monthly cap. A paid plan's key adds the hosting, CDN and proxy flags, the provider behind each flag, and `bot`, whose bot it is and whether its operator vouches for the address: create one in the [console](https://app.vpndetection.io). A free account tries every field.
+No API key needed to start. Without one, a lookup is on Unlimited, the free plan, which answers VPN, Tor and relay detection with no daily or monthly cap. A paid plan's key adds `is_bot` (whether an automated client such as a search engine's crawler uses the address), the AS's `type`, the hosting, CDN and proxy flags, the provider behind each flag, and `bot`, whose bot it is and whether its operator vouches for the address: create one in the [console](https://app.vpndetection.io). A free account tries every field.
 
 Build the core once, at startup, and name this module in the chain:
 
@@ -113,7 +113,7 @@ case vpndetection_cowboy:lookup(Req) of
 end
 ```
 
-Any other agent, or none, is not sent, since its verdict could only be `not_bot`. One address is looked up with at most four crawler agents an hour: past those its lookup sends none, and a request passes as a crawler only where the answer's `bot.verified` is true. A condition can name the verdict, such as `#{user_agent => #{verdict => <<"spoofed">>}}` to refuse a crawler that is not what it claims; it can match only with `allow_bots` on. The verdict needs every field (a paid plan, or the trial): when an agent was sent and the answer carries no `user_agent`, nothing is let through and the middleware warns once, as `on_missing_field` says. Off by default, so the cache holds one answer per address rather than one per agent.
+Any other agent, or none, is not sent, since its verdict could only be `not_bot`. One address is looked up with at most four crawler agents an hour: past those its lookup sends none, and a request passes as a crawler only where the answer's `bot.verified` is true. A condition can name the verdict, such as `#{user_agent => #{verdict => <<"spoofed">>}}` to refuse a crawler that is not what it claims; it can match only with `allow_bots` on. The verdict needs every field (a paid plan, or the trial): when an agent was sent and the answer carries no `user_agent`, nothing is let through and the middleware warns once, as `on_missing_field` says. A keyless app is answered no verdict, so it gets no bot pass. Off by default, so the cache holds one answer per address rather than one per agent.
 
 ## Where the client address comes from
 
@@ -186,14 +186,14 @@ Beyond a few million distinct visitors a day, stop calling the API per request: 
 
 ## Absent is not false
 
-Unlimited, with a key or without one, leaves out `is_hosting`, `is_cdn`, the four proxy flags and `bot`, and of the detail behind each flag it answers only Tor's and relay's. A key your plan does not include is ABSENT from the result map, which means "not in your plan" rather than "checked, and no".
+Unlimited, with a key or without one, leaves out `is_bot`, the AS's `type`, `is_hosting`, `is_cdn`, the four proxy flags and `bot`, and of the detail behind each flag it answers only Tor's and relay's. A key your plan does not include is ABSENT from the result map, which means "not in your plan" rather than "checked, and no".
 
 ```erlang
 maps:get(is_hosting, Result, false)        % when you only want the flag
 maps:get(is_hosting, Result, undefined)    % when the difference matters
 ```
 
-A `block_condition` naming a member your plan does not serve can never match, so the middleware warns once instead of failing silently. Set `on_missing_field => error` to make it an error, which this middleware answers with a `500`.
+A `block_condition` naming a member your plan does not serve can never match, so the middleware warns once instead of failing silently. Set `on_missing_field => error` to make it an error, which this middleware answers with a `500`. A condition on `is_bot` or `asn.type` without a key is reported missing, by that path, and never matched.
 
 ## Other Libraries
 
