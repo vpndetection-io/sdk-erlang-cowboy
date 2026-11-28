@@ -349,6 +349,44 @@ allow_bots_lets_a_verified_crawler_through_for_a_public_peer_test_() ->
         stop(Api)
     end}.
 
+%% A bogon peer, local development with no proxy, sending a crawler's agent under a
+%% condition on the verdict, built as the README builds `allow_bots': answered
+%% locally with no verdict, which is no plan gap, so `on_missing_field' set to
+%% `error' answers it 200 rather than 500 and `warn' logs nothing of the plan, and
+%% nothing reaches the API. The public peer's test is the one above this.
+a_bogon_peer_with_a_crawler_agent_is_no_plan_gap_test_() ->
+    {setup, fun start_apps/0, fun stop_apps/1, fun() ->
+        Forged = #{user_agent => #{verdict => <<"spoofed">>}},
+        Gaps = fun(Warnings) -> [W || W <- seen(Warnings),
+                                      binary:match(W, [<<"does not include">>, <<"user_agent">>]) =/= nomatch] end,
+        [begin
+             Api = api(#{<<"is_vpn">> => true}),
+             Warnings = collector(),
+             Options = #{api_key => <<"k">>, base_url => base_url(Api), allow_bots => true,
+                         block_condition => Forged, on_missing_field => Action, on_warn => sink(Warnings)},
+             %% On a real socket, where a client on this machine is always loopback.
+             App = app(Options),
+             {Status, Raw} = raw(App, "/", [{"User-Agent", binary_to_list(?GOOGLEBOT)}]),
+             ?assertEqual({Action, 200, <<>>}, {Action, Status, case Status of 200 -> <<>>; _ -> Raw end}),
+             Body = json:decode(Raw),
+             ?assertEqual({Action, true}, {Action, maps:get(<<"is_bogon">>, Body)}),
+             ?assertEqual({Action, null}, {Action, maps:get(<<"error">>, Body)}),
+             stop(App),
+             %% And at the middleware callback with each peer set where Cowboy sets it.
+             {ok, Configured} = vpndetection_cowboy:core(Options),
+             [begin
+                  Req = #{peer => {Peer, 40000}, headers => #{<<"user-agent">> => ?GOOGLEBOT}},
+                  {ok, Enriched, _Env} = vpndetection_cowboy:execute(Req, #{vpndetection => Configured}),
+                  ?assertMatch(#{blocked := false, error := undefined, result := #{is_bogon := true}},
+                               vpndetection_cowboy:lookup(Enriched))
+              end || Peer <- [{127, 0, 0, 1}, {10, 0, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 1}]],
+             vpndetection_middleware:close(maps:get(core, Configured)),
+             ?assertEqual({Action, []}, {Action, Gaps(Warnings)}),
+             ?assertEqual({Action, []}, {Action, asked(Api)}),
+             stop(Api)
+         end || Action <- [error, warn]]
+    end}.
+
 %% Named in the chain but never configured: every request would otherwise crash
 %% on a missing env key, which is the opposite of the fail-open this middleware
 %% promises everywhere else.
