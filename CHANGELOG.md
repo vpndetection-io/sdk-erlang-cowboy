@@ -2,6 +2,12 @@
 
 What each release changed for you, newest first. Each line is a commit's summary, linked to its full description and diff. Releases before 2.0.4 are described by their release commits.
 
+## 2.2.7 - 2026-11-28
+
+### Fixes
+
+- Require vpndetection 3.22.1: a bogon's answer reports no missing member ([`a302dbc`](https://github.com/vpndetection-io/sdk-erlang-cowboy/commit/a302dbc3f9a5d894d0a3752561bb30b9c0cf99d7))
+
 ## 2.2.6 - 2026-11-27
 
 ### Features
